@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- This is name of the app -->
+    <string name="app_name">Stock Hawk</string>
+
+    <string name="action_example">Example action</string>
+
+    <!-- This is Settings label in the menu -->
+    <string name="action_settings">Settings</string>
+    <!-- This is label to change units -->
+    <string name="action_change_units">Change Units</string>
+    <!-- This is label in symbol search dialog. -->
+    <string name="symbol_search">Symbol Search</string>
+    <!-- This is content of search dialog -->
+    <string name="content_test">Search for a Stock Symbol</string>
+    <!-- This is hint of search edit text in dialog -->
+    <string name="input_hint">FB</string>
+    <string name="input_prefill"></string>
+    <!-- This is message shown when network is not available -->
+    <string name="network_toast">Uh-oh! This app requires an internet connection</string>
+    <!-- This is text shown in absence of conectiivity or outdated database -->
+    <string name="issue">Either connectivity issue or database is outdated</string>
+    <!-- This is command to tell position of add button on screen -->
+    <string name="add_button">Add stocks floating button at the bottom</string>
+</resources>

@@ -10,4 +10,6 @@
   <string name="input_hint">FB</string>
   <string name="input_prefill"></string>
   <string name="network_toast">Uh-oh! This app requires an internet connection</string>
+  <string name="issue">Either connectivity issue or database is outdated</string>
+  <string name="add_button">Add stocks floating button at the bottom</string>
 </resources>

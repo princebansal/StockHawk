@@ -14,11 +14,13 @@ import org.json.JSONObject;
  */
 public class Utils {
 
+  public static final int RESULT_NA = 23;
   private static String LOG_TAG = Utils.class.getSimpleName();
 
   public static boolean showPercent = true;
 
-  public static ArrayList quoteJsonToContentVals(String JSON){
+  public static ArrayList quoteJsonToContentVals(String JSON, ArrayList<String> overtimeList){
+    Log.d("Utils",JSON);
     ArrayList<ContentProviderOperation> batchOperations = new ArrayList<>();
     JSONObject jsonObject = null;
     JSONArray resultsArray = null;
@@ -30,14 +32,18 @@ public class Utils {
         if (count == 1){
           jsonObject = jsonObject.getJSONObject("results")
               .getJSONObject("quote");
-          batchOperations.add(buildBatchOperation(jsonObject));
+          if(!jsonObject.getString("Bid").equals("null"))
+          batchOperations.add(buildBatchOperation(jsonObject, null));
         } else{
           resultsArray = jsonObject.getJSONObject("results").getJSONArray("quote");
 
           if (resultsArray != null && resultsArray.length() != 0){
             for (int i = 0; i < resultsArray.length(); i++){
               jsonObject = resultsArray.getJSONObject(i);
-              batchOperations.add(buildBatchOperation(jsonObject));
+              if(overtimeList!=null)
+              batchOperations.add(buildBatchOperation(jsonObject,overtimeList.get(i)));
+              else
+                batchOperations.add(buildBatchOperation(jsonObject,null));
             }
           }
         }
@@ -70,13 +76,14 @@ public class Utils {
     return change;
   }
 
-  public static ContentProviderOperation buildBatchOperation(JSONObject jsonObject){
+  public static ContentProviderOperation buildBatchOperation(JSONObject jsonObject, String s){
     ContentProviderOperation.Builder builder = ContentProviderOperation.newInsert(
         QuoteProvider.Quotes.CONTENT_URI);
     try {
       String change = jsonObject.getString("Change");
       builder.withValue(QuoteColumns.SYMBOL, jsonObject.getString("symbol"));
-      builder.withValue(QuoteColumns.BIDPRICE, truncateBidPrice(jsonObject.getString("Bid")));
+      String truBid=truncateBidPrice(jsonObject.getString("Bid"));
+      builder.withValue(QuoteColumns.BIDPRICE, truBid);
       builder.withValue(QuoteColumns.PERCENT_CHANGE, truncateChange(
           jsonObject.getString("ChangeinPercent"), true));
       builder.withValue(QuoteColumns.CHANGE, truncateChange(change, false));
@@ -85,6 +92,11 @@ public class Utils {
         builder.withValue(QuoteColumns.ISUP, 0);
       }else{
         builder.withValue(QuoteColumns.ISUP, 1);
+      }
+      if(s!=null){
+        builder.withValue(QuoteColumns.OVERTIME,s+","+truBid);
+      }else {
+        builder.withValue(QuoteColumns.OVERTIME,"");
       }
 
     } catch (JSONException e){

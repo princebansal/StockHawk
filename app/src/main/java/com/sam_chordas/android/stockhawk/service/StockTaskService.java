@@ -7,6 +7,8 @@ import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.os.RemoteException;
 import android.util.Log;
+import android.widget.Toast;
+
 import com.google.android.gms.gcm.GcmNetworkManager;
 import com.google.android.gms.gcm.GcmTaskService;
 import com.google.android.gms.gcm.TaskParams;
@@ -19,6 +21,7 @@ import com.squareup.okhttp.Response;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 
 /**
  * Created by sam_chordas on 9/30/15.
@@ -32,6 +35,7 @@ public class StockTaskService extends GcmTaskService{
   private Context mContext;
   private StringBuilder mStoredSymbols = new StringBuilder();
   private boolean isUpdate;
+  private ArrayList<String> overtimeList;
 
   public StockTaskService(){}
 
@@ -65,7 +69,7 @@ public class StockTaskService extends GcmTaskService{
     if (params.getTag().equals("init") || params.getTag().equals("periodic")){
       isUpdate = true;
       initQueryCursor = mContext.getContentResolver().query(QuoteProvider.Quotes.CONTENT_URI,
-          new String[] { "Distinct " + QuoteColumns.SYMBOL }, null,
+          new String[] { "Distinct " + QuoteColumns.SYMBOL , QuoteColumns.OVERTIME}, null,
           null, null);
       if (initQueryCursor.getCount() == 0 || initQueryCursor == null){
         // Init task. Populates DB with quotes for the symbols seen below
@@ -78,9 +82,11 @@ public class StockTaskService extends GcmTaskService{
       } else if (initQueryCursor != null){
         DatabaseUtils.dumpCursor(initQueryCursor);
         initQueryCursor.moveToFirst();
+        overtimeList=new ArrayList<>();
         for (int i = 0; i < initQueryCursor.getCount(); i++){
           mStoredSymbols.append("\""+
               initQueryCursor.getString(initQueryCursor.getColumnIndex("symbol"))+"\",");
+          overtimeList.add(initQueryCursor.getString(initQueryCursor.getColumnIndex("overtime")));
           initQueryCursor.moveToNext();
         }
         mStoredSymbols.replace(mStoredSymbols.length() - 1, mStoredSymbols.length(), ")");
@@ -121,8 +127,14 @@ public class StockTaskService extends GcmTaskService{
             mContext.getContentResolver().update(QuoteProvider.Quotes.CONTENT_URI, contentValues,
                 null, null);
           }
-          mContext.getContentResolver().applyBatch(QuoteProvider.AUTHORITY,
-              Utils.quoteJsonToContentVals(getResponse));
+          //Checking if number of bathc operations in greater than one
+          ArrayList opList = Utils.quoteJsonToContentVals(getResponse,overtimeList);
+          if(opList.size()<1){
+            result=Utils.RESULT_NA;
+          }else {
+            mContext.getContentResolver().applyBatch(QuoteProvider.AUTHORITY,
+                    opList);
+          }
         }catch (RemoteException | OperationApplicationException e){
           Log.e(LOG_TAG, "Error applying batch insert", e);
         }

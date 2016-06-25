@@ -5,6 +5,7 @@ import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Build;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -45,8 +46,12 @@ public class QuoteCursorAdapter extends CursorRecyclerViewAdapter<QuoteCursorAda
 
   @Override
   public void onBindViewHolder(final ViewHolder viewHolder, final Cursor cursor){
+    viewHolder.builder.setMessage(cursor.getString(cursor.getColumnIndex(QuoteColumns.OVERTIME)));
+    viewHolder.builder.setTitle(cursor.getString(cursor.getColumnIndex(QuoteColumns.SYMBOL)));
     viewHolder.symbol.setText(cursor.getString(cursor.getColumnIndex("symbol")));
+    viewHolder.symbol.setContentDescription(cursor.getString(cursor.getColumnIndex("symbol")));
     viewHolder.bidPrice.setText(cursor.getString(cursor.getColumnIndex("bid_price")));
+    viewHolder.bidPrice.setContentDescription(cursor.getString(cursor.getColumnIndex("bid_price")));
     int sdk = Build.VERSION.SDK_INT;
     if (cursor.getInt(cursor.getColumnIndex("is_up")) == 1){
       if (sdk < Build.VERSION_CODES.JELLY_BEAN){
@@ -67,8 +72,10 @@ public class QuoteCursorAdapter extends CursorRecyclerViewAdapter<QuoteCursorAda
     }
     if (Utils.showPercent){
       viewHolder.change.setText(cursor.getString(cursor.getColumnIndex("percent_change")));
+      viewHolder.change.setContentDescription(cursor.getString(cursor.getColumnIndex("percent_change"))+" percent change");
     } else{
       viewHolder.change.setText(cursor.getString(cursor.getColumnIndex("change")));
+      viewHolder.change.setContentDescription(cursor.getString(cursor.getColumnIndex("change"))+" change");
     }
   }
 
@@ -89,12 +96,15 @@ public class QuoteCursorAdapter extends CursorRecyclerViewAdapter<QuoteCursorAda
     public final TextView symbol;
     public final TextView bidPrice;
     public final TextView change;
+    AlertDialog.Builder builder;
     public ViewHolder(View itemView){
       super(itemView);
       symbol = (TextView) itemView.findViewById(R.id.stock_symbol);
       symbol.setTypeface(robotoLight);
       bidPrice = (TextView) itemView.findViewById(R.id.bid_price);
       change = (TextView) itemView.findViewById(R.id.change);
+      builder=new AlertDialog.Builder(mContext);
+      itemView.setOnClickListener(this);
     }
 
     @Override
@@ -109,7 +119,7 @@ public class QuoteCursorAdapter extends CursorRecyclerViewAdapter<QuoteCursorAda
 
     @Override
     public void onClick(View v) {
-
+      builder.create().show();
     }
   }
 }
