@@ -12,4 +12,5 @@
   <string name="network_toast">Uh-oh! This app requires an internet connection</string>
   <string name="issue">Either connectivity issue or database is outdated</string>
   <string name="add_button">Add stocks floating button at the bottom</string>
+  <string name="alert_stock_already">This stock is already saved!</string>
 </resources>
